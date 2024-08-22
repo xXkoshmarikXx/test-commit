@@ -1,0 +1,15 @@
+name: "Echo Greeting Action"
+description: "A simple action that echoes a greeting message."
+inputs:
+  name:
+    description: "The name of the person to greet"
+    required: true
+    default: "World"
+
+runs:
+  using: "composite"  # Allows you to define a sequence of shell commands
+  steps:
+    - name: Echo the greeting
+      shell: bash
+      run: |
+        echo "Hello, ${{ inputs.name }}!"

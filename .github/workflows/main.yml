@@ -1,0 +1,23 @@
+name: Greet User Workflow
+
+on:
+  push:
+    branches: 
+      - 'master'
+
+permissions:
+  id-token: write   # Required for requesting the JWT
+  contents: read    # Required for actions/checkout
+
+jobs:
+  example-job:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v2
+
+      - name: Run Echo Greeting Action
+        uses: ./
+        with:
+          name: 'Octocat'
