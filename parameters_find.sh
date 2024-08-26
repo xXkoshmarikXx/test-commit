@@ -1,4 +1,6 @@
 #!/usr/bin/env bash
+set -euxo pipefail
+
 SECRET_NAME="vault_secret"
 
 get_region() {
@@ -12,6 +14,21 @@ get_account_id() {
 get_parameter() {
     local name=$1
     aws ssm get-parameter --name "$name" --query "Parameter.Value" --output text --region "$REGION"
+}
+
+REGION=$(get_region)
+echo "region: $REGION"
+
+ACCOUNT_ID=$(get_account_id)
+echo "account: $ACCOUNT_ID"
+
+PARAMETER=$(get_parameter "UserDataYAMLConfig")
+
+TOPIC_NAME=$(echo "$PARAMETER" | grep 'topic_name' | awk '{print $2}')
+echo "topic: $TOPIC_NAME"
+
+get_metadata_token() {
+    curl -s -X PUT "http://169.254.169.254/latest/api/token" -H "X-aws-ec2-metadata-token-ttl-seconds: 21600"
 }
 
 get_instance_tags() {
@@ -32,23 +49,10 @@ get_instance_tags() {
     fi
 }
 
-cleanup() {
-    if [ -f "$VAULT_PASSWORD_FILE" ]; then
-        rm -f "$VAULT_PASSWORD_FILE"
-        echo "vault_password file removed."
-    fi
-}
+METADATA_TOKEN=$(get_metadata_token)
 
-PARAMETER=$(get_parameter "UserDataYAMLConfig")
-
-REGION=$(get_region)
-echo "region: $REGION"
-
-ACCOUNT_ID=$(get_account_id)
-echo "account: $ACCOUNT_ID"
-
-TOPIC_NAME=$(echo "$PARAMETER" | grep 'topic_name' | awk '{print $2}')
-echo "topic: $TOPIC_NAME"
+PLAYBOOK_NAME=$(get_instance_tags "$METADATA_TOKEN" playbook_name)
+echo "playbook_name: $PLAYBOOK_NAME"
 
 GET_PIP_URL=$(echo "$PARAMETER" | grep 'get_pip_url' | awk '{print $2}')
 echo "Get Pip URL: $GET_PIP_URL"
@@ -56,9 +60,8 @@ echo "Get Pip URL: $GET_PIP_URL"
 PLAYBOOK_BASE_URL=$(echo "$PARAMETER" | grep 'playbook_base_url' | awk '{print $2}')
 echo "Playbook Base URL: $PLAYBOOK_BASE_URL"
 
-PLAYBOOK_NAME=$(get_instance_tags "$METADATA_TOKEN" playbook_name)
-echo "playbook_name: $PLAYBOOK_NAME"
-
 VAULT_PASSWORD=$(aws secretsmanager get-secret-value --secret-id "$SECRET_NAME" --region "$REGION" --query 'SecretString' --output text)
 
-bash parameters_accepts.sh --token "$TOKEN" --get_pip_url "$GET_PIP_URL" --playbook_name "$PLAYBOOK_NAME" --playbook_base_url "$PLAYBOOK_BASE_URL" -r "$REGION" --account_id "$ACCOUNT_ID" --topic_name "$TOPIC_NAME"
+curl -o /tmp/parameters_accepts.sh https://raw.githubusercontent.com/xXkoshmarikXx/test-commit/master/parameters_accepts.sh
+bash /tmp/parameters_accepts.sh --tags installation --get_pip_url "$GET_PIP_URL" --playbook_name "$PLAYBOOK_NAME" --playbook_base_url "$PLAYBOOK_BASE_URL" -r "$REGION" --account_id "$ACCOUNT_ID" --topic_name "$TOPIC_NAME" --vault_password $VAULT_PASSWORD --metadata_token $METADATA_TOKEN
+#bash parameters_accepts.sh --get_pip_url "$GET_PIP_URL" --playbook_name "$PLAYBOOK_NAME" --playbook_base_url "$PLAYBOOK_BASE_URL" -r "$REGION" --account_id "$ACCOUNT_ID" --topic_name "$TOPIC_NAME"

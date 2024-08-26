@@ -1,10 +1,11 @@
 #!/usr/bin/env bash
-
+set -euxo pipefail
 # Constants
 LOCAL_IDENTIFY_OS_SCRIPT="identify_os.sh"
 REMOTE_IDENTIFY_OS_SCRIPT="https://raw.githubusercontent.com/inqwise/ansible-automation-toolkit/default/identify_os.sh"
 VAULT_PASSWORD_FILE="vault_password"
 PLAYBOOK_VERSION="latest"
+
 ACCOUNT_ID=""
 TOPIC_NAME=""
 REGION=""
@@ -14,14 +15,15 @@ EXTRA=""
 OFFLINE=false
 TEST_MODE=false
 PIP_COMMAND="pip"
-
-TOKEN=""
 GET_PIP_URL=""
 PLAYBOOK_NAME=""
 PLAYBOOK_BASE_URL=""
 
+VAULT_PASSWORD=""
+METADATA_TOKEN=""
+
 usage() {
-    echo "Usage: $0 [-e <extra>] [--skip-tags <skip-tags>] [--tags <tags>] [--offline] [--test] [--token <token>] [--get_pip_url <url>] [--playbook_name <name>] [--playbook_base_url <url>] [-r <name>] [--account_id <name>] [--topic_name <name>]"
+    echo "Usage: $0 [-e <extra>] [--skip-tags <skip-tags>] [--tags <tags>] [--offline] [--test] [--token <token>] [--get_pip_url <url>] [--playbook_name <name>] [--playbook_base_url <url>] [-r <name>] [--account_id <name>] [--topic_name <name>] [--vault_password <name>]"
     exit 1
 }
 
@@ -34,10 +36,11 @@ while getopts ":e:r:-:" option; do
         tags) TAGS="${!OPTIND}"; OPTIND=$((OPTIND + 1));;
         account_id) ACCOUNT_ID="${!OPTIND}"; OPTIND=$((OPTIND + 1));;
         topic_name) TOPIC_NAME="${!OPTIND}"; OPTIND=$((OPTIND + 1));;
-        token) TOKEN="${!OPTIND}"; OPTIND=$((OPTIND + 1));;
         get_pip_url) GET_PIP_URL="${!OPTIND}"; OPTIND=$((OPTIND + 1));;
         playbook_name) PLAYBOOK_NAME="${!OPTIND}"; OPTIND=$((OPTIND + 1));;
         playbook_base_url) PLAYBOOK_BASE_URL="${!OPTIND}"; OPTIND=$((OPTIND + 1));;
+        vault_password) VAULT_PASSWORD="${!OPTIND}"; OPTIND=$((OPTIND + 1));;
+        metadata_token) METADATA_TOKEN="${!OPTIND}"; OPTIND=$((OPTIND + 1));;
         offline) OFFLINE=true;;
         test) TEST_MODE=true;;
         *) echo "Invalid option --${OPTARG}"; usage;;
@@ -76,8 +79,11 @@ identify_os() {
     fi
 }
 
-get_metadata_token() {
-    curl -s -X PUT "http://169.254.169.254/latest/api/token" -H "X-aws-ec2-metadata-token-ttl-seconds: 21600"
+cleanup() {
+    if [ -f "$VAULT_PASSWORD_FILE" ]; then
+        rm -f "$VAULT_PASSWORD_FILE"
+        echo "vault_password file removed."
+    fi
 }
 
 catch_error() {
@@ -157,17 +163,7 @@ main() {
 
     identify_os
 
-    METADATA_TOKEN=$(get_metadata_token)
-    PLAYBOOK_NAME=$(get_instance_tags "$METADATA_TOKEN" playbook_name)
     echo "playbook_name: $PLAYBOOK_NAME"
-
-    GET_PIP_URL=$(echo "$PARAMETER" | grep 'get_pip_url' | awk '{print $2}')
-    echo "Get Pip URL: $GET_PIP_URL"
-
-    PLAYBOOK_BASE_URL=$(echo "$PARAMETER" | grep 'playbook_base_url' | awk '{print $2}')
-    echo "Playbook Base URL: $PLAYBOOK_BASE_URL"
-
-    VAULT_PASSWORD=$(aws secretsmanager get-secret-value --secret-id "$SECRET_NAME" --region "$REGION" --query 'SecretString' --output text)
 
     assert_var "PLAYBOOK_NAME" "$PLAYBOOK_NAME"
     assert_var "PLAYBOOK_BASE_URL" "$PLAYBOOK_BASE_URL"
@@ -186,4 +182,9 @@ main() {
 trap 'catch_error "$ERROR"' ERR
 
 # Execute the main function and capture errors
-{ ERROR=$(main 2>&1 1>&$out); } {out}>&1
+ERROR=$(main 2>&1)
+
+# If you want to ensure that the script exits after an error, you can use:
+if [ $? -ne 0 ]; then
+    exit 1
+fi
