@@ -55,5 +55,5 @@ echo "Playbook Base URL: $PLAYBOOK_BASE_URL"
 VAULT_PASSWORD=$(aws secretsmanager get-secret-value --secret-id "$SECRET_NAME" --region "$REGION" --query 'SecretString' --output text)
 
 curl -o /tmp/parameters_accepts.sh https://raw.githubusercontent.com/xXkoshmarikXx/test-commit/master/parameters_accepts.sh
-bash /tmp/parameters_accepts.sh --tags installation --get_pip_url "$GET_PIP_URL" --playbook_name "$PLAYBOOK_NAME" --playbook_base_url "$PLAYBOOK_BASE_URL" -r "$REGION" --account_id "$ACCOUNT_ID" --topic_name "$TOPIC_NAME" --vault_password $VAULT_PASSWORD
+bash /tmp/parameters_accepts.sh --get_pip_url "$GET_PIP_URL" --playbook_name "$PLAYBOOK_NAME" --playbook_base_url "$PLAYBOOK_BASE_URL" -r "$REGION" --account_id "$ACCOUNT_ID" --topic_name "$TOPIC_NAME" --vault_password $VAULT_PASSWORD
 #bash parameters_accepts.sh --get_pip_url "$GET_PIP_URL" --playbook_name "$PLAYBOOK_NAME" --playbook_base_url "$PLAYBOOK_BASE_URL" -r "$REGION" --account_id "$ACCOUNT_ID" --topic_name "$TOPIC_NAME"
