@@ -130,7 +130,7 @@ download_playbook() {
     local base_url=$1
     local name=$2
     local local_folder=$3
-    local s3_folder="$base_url/$name/$PLAYBOOK_VERSION/"
+    local s3_folder="$base_url/$name/$PLAYBOOK_VERSION"
     
     if aws s3 ls "$s3_folder" --region $REGION >/dev/null 2>&1; then
         echo "download playbook '$s3_folder'"
