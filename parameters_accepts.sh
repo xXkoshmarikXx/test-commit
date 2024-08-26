@@ -1,48 +1,31 @@
 #!/usr/bin/env bash
-set -euxo pipefail
 # Constants
 LOCAL_IDENTIFY_OS_SCRIPT="identify_os.sh"
 REMOTE_IDENTIFY_OS_SCRIPT="https://raw.githubusercontent.com/inqwise/ansible-automation-toolkit/default/identify_os.sh"
 VAULT_PASSWORD_FILE="vault_password"
 PLAYBOOK_VERSION="latest"
-
-ACCOUNT_ID=""
-TOPIC_NAME=""
-REGION=""
-SKIP_TAGS=""
-TAGS=""
-EXTRA=""
-OFFLINE=false
-TEST_MODE=false
 PIP_COMMAND="pip"
+
+REGION=""
 GET_PIP_URL=""
 PLAYBOOK_NAME=""
 PLAYBOOK_BASE_URL=""
-
 VAULT_PASSWORD=""
-METADATA_TOKEN=""
 
 usage() {
-    echo "Usage: $0 [-e <extra>] [--skip-tags <skip-tags>] [--tags <tags>] [--offline] [--test] [--token <token>] [--get_pip_url <url>] [--playbook_name <name>] [--playbook_base_url <url>] [-r <name>] [--account_id <name>] [--topic_name <name>] [--vault_password <name>]"
+    echo "Usage: $0 [--token <token>] [--get_pip_url <url>] [--playbook_name <name>] [--playbook_base_url <url>] [-r <name>] [--account_id <name>] [--topic_name <name>] [--vault_password <name>]"
     exit 1
 }
 
-while getopts ":e:r:-:" option; do
+while getopts ":r:-:" option; do
   case "${option}" in
-    e) EXTRA="${OPTARG}";;
+    r) REGION=${OPTARG};;
     -)
       case "${OPTARG}" in
-        skip-tags) SKIP_TAGS="${!OPTIND}"; OPTIND=$((OPTIND + 1));;
-        tags) TAGS="${!OPTIND}"; OPTIND=$((OPTIND + 1));;
-        account_id) ACCOUNT_ID="${!OPTIND}"; OPTIND=$((OPTIND + 1));;
-        topic_name) TOPIC_NAME="${!OPTIND}"; OPTIND=$((OPTIND + 1));;
         get_pip_url) GET_PIP_URL="${!OPTIND}"; OPTIND=$((OPTIND + 1));;
         playbook_name) PLAYBOOK_NAME="${!OPTIND}"; OPTIND=$((OPTIND + 1));;
         playbook_base_url) PLAYBOOK_BASE_URL="${!OPTIND}"; OPTIND=$((OPTIND + 1));;
         vault_password) VAULT_PASSWORD="${!OPTIND}"; OPTIND=$((OPTIND + 1));;
-        metadata_token) METADATA_TOKEN="${!OPTIND}"; OPTIND=$((OPTIND + 1));;
-        offline) OFFLINE=true;;
-        test) TEST_MODE=true;;
         *) echo "Invalid option --${OPTARG}"; usage;;
       esac
       ;;
@@ -89,8 +72,6 @@ cleanup() {
 catch_error() {
     echo "An error occurred in goldenimage_script: '$1'"
     cleanup
-    local instance_id=$(ec2-metadata --instance-id | sed -n 's/.*instance-id: \(i-[a-f0-9]\{17\}\).*/\1/p')
-    aws sns publish --topic-arn "arn:aws:sns:$REGION:$ACCOUNT_ID:$TOPIC_NAME" --message "$1" --subject "$instance_id" --region "$REGION"
 }
 
 setup_environment() {
@@ -169,6 +150,7 @@ main() {
     assert_var "PLAYBOOK_BASE_URL" "$PLAYBOOK_BASE_URL"
     assert_var "VAULT_PASSWORD" "$VAULT_PASSWORD"
     assert_var "GET_PIP_URL" "$GET_PIP_URL"
+    assert_var "REGION" "$REGION"
 
     setup_environment
     install_pip "$GET_PIP_URL"

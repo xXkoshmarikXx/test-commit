@@ -1,6 +1,4 @@
 #!/usr/bin/env bash
-set -euxo pipefail
-
 SECRET_NAME="vault_secret"
 
 get_region() {
@@ -19,13 +17,7 @@ get_parameter() {
 REGION=$(get_region)
 echo "region: $REGION"
 
-ACCOUNT_ID=$(get_account_id)
-echo "account: $ACCOUNT_ID"
-
 PARAMETER=$(get_parameter "UserDataYAMLConfig")
-
-TOPIC_NAME=$(echo "$PARAMETER" | grep 'topic_name' | awk '{print $2}')
-echo "topic: $TOPIC_NAME"
 
 get_metadata_token() {
     curl -s -X PUT "http://169.254.169.254/latest/api/token" -H "X-aws-ec2-metadata-token-ttl-seconds: 21600"
@@ -63,5 +55,5 @@ echo "Playbook Base URL: $PLAYBOOK_BASE_URL"
 VAULT_PASSWORD=$(aws secretsmanager get-secret-value --secret-id "$SECRET_NAME" --region "$REGION" --query 'SecretString' --output text)
 
 curl -o /tmp/parameters_accepts.sh https://raw.githubusercontent.com/xXkoshmarikXx/test-commit/master/parameters_accepts.sh
-bash /tmp/parameters_accepts.sh --tags installation --get_pip_url "$GET_PIP_URL" --playbook_name "$PLAYBOOK_NAME" --playbook_base_url "$PLAYBOOK_BASE_URL" -r "$REGION" --account_id "$ACCOUNT_ID" --topic_name "$TOPIC_NAME" --vault_password $VAULT_PASSWORD --metadata_token $METADATA_TOKEN
+bash /tmp/parameters_accepts.sh --tags installation --get_pip_url "$GET_PIP_URL" --playbook_name "$PLAYBOOK_NAME" --playbook_base_url "$PLAYBOOK_BASE_URL" -r "$REGION" --account_id "$ACCOUNT_ID" --topic_name "$TOPIC_NAME" --vault_password $VAULT_PASSWORD
 #bash parameters_accepts.sh --get_pip_url "$GET_PIP_URL" --playbook_name "$PLAYBOOK_NAME" --playbook_base_url "$PLAYBOOK_BASE_URL" -r "$REGION" --account_id "$ACCOUNT_ID" --topic_name "$TOPIC_NAME"
