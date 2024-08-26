@@ -138,7 +138,7 @@ download_playbook() {
         aws s3 cp "$s3_folder/" "$local_folder" --recursive --region "$REGION" --exclude '.*' --exclude '*/.*'
         chmod -R 755 "$local_folder"
     else
-        echo "S3 folder '$s3_folder' does not exist. Exiting." >&2
+        echo "S3 folder $s3_folder does not exist. Exiting." >&2
         exit 1
     fi
 }
