@@ -1,5 +1,4 @@
 #!/usr/bin/env bash
-set -euo pipefail
 # Constants
 LOCAL_IDENTIFY_OS_SCRIPT="identify_os.sh"
 REMOTE_IDENTIFY_OS_SCRIPT="https://raw.githubusercontent.com/inqwise/ansible-automation-toolkit/default/identify_os.sh"
@@ -160,14 +159,5 @@ main() {
 
     echo "End goldenimage.sh"
 }
-
-# Trap errors and execute the catch_error function
-trap 'catch_error "$ERROR"' ERR
-
 # Execute the main function and capture errors
-ERROR=$(main 2>&1)
-
-# If you want to ensure that the script exits after an error, you can use:
-if [ $? -ne 0 ]; then
-    exit 1
-fi
+{ ERROR=$(main 2>&1 1>&$out); } {out}>&1

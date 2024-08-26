@@ -76,7 +76,7 @@ locals {
         "curl --connect-timeout 2.37 -m 20 -o /tmp/parameters_find.sh https://raw.githubusercontent.com/xXkoshmarikXx/test-commit/master/parameters_find.sh && bash /tmp/parameters_find.sh --tags installation",
         ] : [],
         scripts = fileexists("goldenimage-test.sh") ? [
-            "parameters_find.sh"
+            "goldenimage-test.sh"
         ] : []
     }
     
