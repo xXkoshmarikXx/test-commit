@@ -1,4 +1,5 @@
 #!/usr/bin/env bash
+set -euo pipefail
 # Constants
 LOCAL_IDENTIFY_OS_SCRIPT="identify_os.sh"
 REMOTE_IDENTIFY_OS_SCRIPT="https://raw.githubusercontent.com/inqwise/ansible-automation-toolkit/default/identify_os.sh"
