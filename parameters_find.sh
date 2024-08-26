@@ -1,4 +1,6 @@
 #!/usr/bin/env bash
+set -euo pipefail
+
 SECRET_NAME="vault_secret"
 
 get_region() {
