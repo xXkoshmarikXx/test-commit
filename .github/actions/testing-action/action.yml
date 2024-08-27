@@ -1,15 +1,24 @@
-name: "Echo Greeting Action"
-description: "A simple action that echoes a greeting message."
+# .github/actions/print-message/action.yml
+name: "Print Message Action"
+description: "A simple action to print a message and greet a person."
 inputs:
   name:
     description: "The name of the person to greet"
     required: true
     default: "World"
+  message:
+    description: "A custom message to print"
+    required: true
 
 runs:
-  using: "composite"  # Allows you to define a sequence of shell commands
+  using: "composite"
   steps:
     - name: Echo the greeting
       shell: bash
       run: |
         echo "Hello, ${{ inputs.name }}!"
+
+    - name: Print the custom message
+      shell: bash
+      run: |
+        echo "Message: ${{ inputs.message }}"
