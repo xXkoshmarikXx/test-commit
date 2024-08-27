@@ -30,10 +30,10 @@ jobs:
         uses: ./.github/actions/testing-action
         with:
           name: "koshmarik"
-          message: "Welcome to our project!"
+          name1: "Welcome to our project"
 
   # Job to call the reusable workflow
   call-reusable-workflow:
-    uses: .github/workflows/reusable-workflow.yml
+    uses: ./.github/workflows/reusable-workflow.yml
     with:
-      message: "Hello from reusable workflow!"
+      name: "Hello from reusable workflow!"

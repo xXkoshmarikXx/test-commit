@@ -15,4 +15,3 @@ jobs:
       - name: Print the message
         run: |
           echo "Message: ${{ inputs.message }}"
-          
