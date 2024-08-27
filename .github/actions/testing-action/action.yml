@@ -7,8 +7,9 @@ inputs:
     required: true
     default: "World"
   message:
-    description: "A custom message to print"
+    description: 'Message to print'
     required: true
+    default: "meow"
 
 runs:
   using: "composite"

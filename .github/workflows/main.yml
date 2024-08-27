@@ -17,23 +17,19 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v2
 
-      - name: Run Echo Greeting Action
-        uses: ./.github/actions/testing-action
-        with:
-          name: 'koshmarik'
-
-  # Job to call the composite action
-  call-combined-composite-action:
-    runs-on: ubuntu-latest
-    steps:
       - name: Run combined composite action
         uses: ./.github/actions/testing-action
         with:
+          message: "Welcome to our project"
           name: "koshmarik"
-          name1: "Welcome to our project"
 
   # Job to call the reusable workflow
   call-reusable-workflow:
     uses: ./.github/workflows/reusable-workflow.yml
     with:
-      name: "Hello from reusable workflow!"
+      message: "Hello from reusable workflow!"
+
+  remote-reusable-workflow:
+    uses: xXkoshmarikXx/reusable-workflow-test/workflows/main.yml@master
+    with:
+      message: "Hello from remote reusable workflow!"
