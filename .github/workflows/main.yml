@@ -21,7 +21,6 @@ jobs:
         uses: ./.github/actions/testing-action
         with:
           message: "Welcome to our project"
-          name: "koshmarik"
 
   # Job to call the reusable workflow
   call-reusable-workflow:
@@ -29,7 +28,7 @@ jobs:
     with:
       message: "Hello from reusable workflow!"
 
-  remote-reusable-workflow:
-    uses: xXkoshmarikXx/reusable-workflow-test/workflows/main.yml@master
-    with:
-      message: "Hello from remote reusable workflow!"
+  # remote-reusable-workflow:
+  #   uses: xXkoshmarikXx/reusable-workflow-test/.github/workflows/main.yml@master
+  #   with:
+  #     message: "Hello from remote reusable workflow!"

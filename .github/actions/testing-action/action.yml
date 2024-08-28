@@ -17,7 +17,7 @@ runs:
     - name: Echo the greeting
       shell: bash
       run: |
-        echo "Hello, ${{ inputs.name }}!"
+        echo "Hello, ${{ vars.NAME }}!"
 
     - name: Print the custom message
       shell: bash
